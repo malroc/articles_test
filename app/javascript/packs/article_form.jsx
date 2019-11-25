@@ -16,7 +16,7 @@ export default class ArticleForm extends React.Component {
     let body = JSON.stringify({article: this.props.article})
 
     fetch(
-      '/articles.json',
+      '/api/v1/articles',
       {
         method: 'POST',
         headers: {'Content-Type': 'application/json;charset=utf-8'},

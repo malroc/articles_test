@@ -23,7 +23,7 @@ class Store {
       }
     }
 
-    let url = '/articles.json'
+    let url = '/api/v1/articles'
 
     if (query) {
       url += `?${query}`

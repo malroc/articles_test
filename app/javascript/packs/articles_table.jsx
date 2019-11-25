@@ -21,7 +21,7 @@ export default class ArticlesTable extends React.Component {
 
   async deleteArticle(id) {
     await fetch(
-      `/articles/${id}.json`,
+      `/api/v1/articles/${id}`,
       {
         method: 'DELETE',
         headers: {'Content-Type': 'application/json;charset=utf-8'}
