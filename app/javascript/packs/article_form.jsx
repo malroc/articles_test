@@ -1,5 +1,6 @@
 import React from 'react'
 import { observer } from 'mobx-react'
+import consumer from '../channels/consumer'
 import { RootStoreContext } from '../stores/root_store'
 
 @observer
@@ -11,6 +12,21 @@ export default class ArticleForm extends React.Component {
 
     this.onSubmit = this.onSubmit.bind(this)
     this.onChange = this.onChange.bind(this)
+  }
+
+  componentDidMount() {
+    let store = this.context.storiesStore
+
+    store.fetch()
+
+    consumer.subscriptions.create(
+      {channel: 'StoriesChannel', room: 'stories_channel'},
+      {
+        async received() {
+          store.fetch()
+        }
+      }
+    )
   }
 
   onSubmit(evt) {
@@ -63,11 +79,17 @@ export default class ArticleForm extends React.Component {
             <input
               className="form-control"
               type="text"
+              list="article_names"
               name="story_name"
               placeholder="Story name"
               value={this.context.articlesStore.newItem['story_name']}
               onChange={this.onChange}
             />
+            <datalist id="article_names">
+              {this.context.storiesStore.items.map(story => (
+                <option value={story.name} />
+              ))}
+            </datalist>
           </div>
           <div className="col">
             <button

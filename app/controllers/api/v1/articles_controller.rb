@@ -46,7 +46,13 @@ class Api::V1::ArticlesController < Api::V1::Controller
   end
 
   def create
-    @story = Story.where(name: params[:article][:story_name]).first_or_create
+    @story = Story.find_by(name: params[:article][:story_name])
+
+    unless @story
+      @story = Story.create(name: params[:article][:story_name])
+      ActionCable.server.broadcast("stories_channel", body: :story_created)
+    end
+
     @article = Article.new(article_params)
     @article.story = @story
 
