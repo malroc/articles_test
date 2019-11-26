@@ -87,7 +87,7 @@ export default class ArticleForm extends React.Component {
             />
             <datalist id="article_names">
               {this.context.storiesStore.items.map(story => (
-                <option value={story.name} />
+                <option key={`story_${story.name}`} value={story.name} />
               ))}
             </datalist>
           </div>
