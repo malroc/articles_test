@@ -30,7 +30,7 @@ class Api::V1::ArticlesController < Api::V1::Controller
       ActionCable.server.broadcast("articles_channel", body: :article_created)
     end
 
-    respond_with @article
+    respond_with :api, :v1, @article
   end
 
   def destroy
@@ -39,7 +39,7 @@ class Api::V1::ArticlesController < Api::V1::Controller
 
     ActionCable.server.broadcast("articles_channel", body: :article_destroyed)
 
-    respond_with @article
+    respond_with :api, :v1, @article
   end
 
   protected
