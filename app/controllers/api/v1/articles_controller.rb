@@ -42,7 +42,7 @@ class Api::V1::ArticlesController < Api::V1::Controller
         select("articles.*, s.articles_count, s.article_types_count").
         includes(:story)
 
-    respond_with response_data(@articles.includes(:story), group_by)
+    respond_with response_data(@articles, group_by)
   end
 
   def create
