@@ -1,7 +1,6 @@
-import consumer from './consumer'
 import { observable } from 'mobx'
 
-class Store {
+export default class ArticlesStore {
   @observable data = []
   @observable query = {
     'search_by_name': '',
@@ -35,14 +34,3 @@ class Store {
     this.data = data
   }
 }
-
-export const store = new Store()
-
-consumer.subscriptions.create(
-  {channel: 'ArticlesChannel', room: 'articles_channel'},
-  {
-    async received() {
-      store.fetch()
-    }
-  }
-)

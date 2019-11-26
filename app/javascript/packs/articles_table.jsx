@@ -1,22 +1,36 @@
 import React from 'react'
 import { observer } from 'mobx-react'
-import { store } from '../channels/articles_channel'
+import consumer from '../channels/consumer'
+import { RootStoreContext } from '../stores/root_store'
 
 @observer
 export default class ArticlesTable extends React.Component {
-  constructor (props) {
-    super(props)
+  static contextType = RootStoreContext
+
+  constructor(props, context) {
+    super(props, context)
 
     this.onChange = this.onChange.bind(this)
   }
 
   componentDidMount() {
+    let store = this.context.articlesStore
+
     store.fetch()
+
+    consumer.subscriptions.create(
+      {channel: 'ArticlesChannel', room: 'articles_channel'},
+      {
+        async received() {
+          store.fetch()
+        }
+      }
+    )
   }
 
   onChange(evt) {
-    store.query[evt.target.name] = evt.target.value
-    store.fetch()
+    this.context.articlesStore.query[evt.target.name] = evt.target.value
+    this.context.articlesStore.fetch()
   }
 
   async deleteArticle(id) {
@@ -28,7 +42,7 @@ export default class ArticlesTable extends React.Component {
       }
     )
 
-    store.fetch()
+    this.context.articlesStore.fetch()
   }
 
   render() {
@@ -52,7 +66,7 @@ export default class ArticlesTable extends React.Component {
                   type="text"
                   name="search_by_name"
                   placeholder="Search by name"
-                  value={store.query.search_by_name}
+                  value={this.context.articlesStore.query.search_by_name}
                   onChange={this.onChange}
                 />
                 <span className="input-group-append">
@@ -69,7 +83,7 @@ export default class ArticlesTable extends React.Component {
                   type="text"
                   name="search_by_text"
                   placeholder="Search by text"
-                  value={store.query.search_by_text}
+                  value={this.context.articlesStore.query.search_by_text}
                   onChange={this.onChange}
                 />
                 <span className="input-group-append">
@@ -83,7 +97,7 @@ export default class ArticlesTable extends React.Component {
               <select
                 className="form-control"
                 name="sort_by"
-                value={store.query.sort_by}
+                value={this.context.articlesStore.query.sort_by}
                 onChange={this.onChange}
               >
                 <option value="">(No sorting)</option>
@@ -97,7 +111,7 @@ export default class ArticlesTable extends React.Component {
               <select
                 className="form-control"
                 name="group_by"
-                value={store.query.group_by}
+                value={this.context.articlesStore.query.group_by}
                 onChange={this.onChange}
               >
                 <option value="">(No grouping)</option>
@@ -110,7 +124,7 @@ export default class ArticlesTable extends React.Component {
             <td></td>
           </tr>
         </tfoot>
-        {store.data.map(group => (
+        {this.context.articlesStore.data.map(group => (
           <tbody key={group.key}>
             {group.list.map(article => (
               <tr key={article.id}>
