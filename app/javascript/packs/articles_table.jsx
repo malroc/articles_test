@@ -29,19 +29,7 @@ export default class ArticlesTable extends React.Component {
   }
 
   onChange(evt) {
-    this.context.articlesStore.query[evt.target.name] = evt.target.value
-    this.context.articlesStore.fetch()
-  }
-
-  async deleteArticle(id) {
-    await fetch(
-      `/api/v1/articles/${id}`,
-      {
-        method: 'DELETE',
-        headers: {'Content-Type': 'application/json;charset=utf-8'}
-      }
-    )
-
+    this.context.articlesStore.queryParams[evt.target.name] = evt.target.value
     this.context.articlesStore.fetch()
   }
 
@@ -66,7 +54,7 @@ export default class ArticlesTable extends React.Component {
                   type="text"
                   name="search"
                   placeholder="Search article"
-                  value={this.context.articlesStore.query.search}
+                  value={this.context.articlesStore.queryParams['search']}
                   onChange={this.onChange}
                 />
                 <span className="input-group-append">
@@ -80,7 +68,7 @@ export default class ArticlesTable extends React.Component {
               <select
                 className="form-control"
                 name="sort_by"
-                value={this.context.articlesStore.query.sort_by}
+                value={this.context.articlesStore.queryParams['sort_by']}
                 onChange={this.onChange}
               >
                 <option value="">(No sorting)</option>
@@ -94,7 +82,7 @@ export default class ArticlesTable extends React.Component {
               <select
                 className="form-control"
                 name="group_by"
-                value={this.context.articlesStore.query.group_by}
+                value={this.context.articlesStore.queryParams['group_by']}
                 onChange={this.onChange}
               >
                 <option value="">(No grouping)</option>
@@ -107,7 +95,7 @@ export default class ArticlesTable extends React.Component {
             <td></td>
           </tr>
         </tfoot>
-        {this.context.articlesStore.data.map(group => (
+        {this.context.articlesStore.items.map(group => (
           <tbody key={group.key}>
             {group.list.map(article => (
               <tr key={article.id}>
@@ -119,7 +107,9 @@ export default class ArticlesTable extends React.Component {
                   <button
                     type="button"
                     className="btn btn-danger"
-                    onClick={() => this.deleteArticle(article.id)}
+                    onClick={
+                      () => this.context.articlesStore.destroy(article.id)
+                    }
                   >
                     Delete article
                   </button>

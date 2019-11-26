@@ -1,10 +1,13 @@
 import React from 'react'
 import { observer } from 'mobx-react'
+import { RootStoreContext } from '../stores/root_store'
 
 @observer
 export default class ArticleForm extends React.Component {
-  constructor (props) {
-    super(props)
+  static contextType = RootStoreContext
+
+  constructor(props, context) {
+    super(props, context)
 
     this.onSubmit = this.onSubmit.bind(this)
     this.onChange = this.onChange.bind(this)
@@ -13,25 +16,11 @@ export default class ArticleForm extends React.Component {
   onSubmit(evt) {
     evt.preventDefault()
 
-    let body = JSON.stringify({article: this.props.article})
-
-    fetch(
-      '/api/v1/articles',
-      {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json;charset=utf-8'},
-        body: body
-      }
-    )
-
-    this.props.article.name = ''
-    this.props.article.text = ''
-    this.props.article.article_type = 'blog_post'
-    this.props.article.story_name = ''
+    this.context.articlesStore.create()
   }
 
   onChange(evt) {
-    this.props.article[evt.target.name] = evt.target.value
+    this.context.articlesStore.newItem[evt.target.name] = evt.target.value
   }
 
   render() {
@@ -44,7 +33,7 @@ export default class ArticleForm extends React.Component {
               type="text"
               name="name"
               placeholder="Name"
-              value={this.props.article.name}
+              value={this.context.articlesStore.newItem['name']}
               onChange={this.onChange}
             />
           </div>
@@ -54,7 +43,7 @@ export default class ArticleForm extends React.Component {
               type="text"
               name="text"
               placeholder="Text"
-              value={this.props.article.text}
+              value={this.context.articlesStore.newItem['text']}
               onChange={this.onChange}
             />
           </div>
@@ -62,7 +51,7 @@ export default class ArticleForm extends React.Component {
             <select
               className="form-control"
               name="article_type"
-              value={this.props.article.article_type}
+              value={this.context.articlesStore.newItem['article_type']}
               onChange={this.onChange}
             >
               <option value="blog_post">Blog post</option>
@@ -76,7 +65,7 @@ export default class ArticleForm extends React.Component {
               type="text"
               name="story_name"
               placeholder="Story name"
-              value={this.props.article.story_name}
+              value={this.context.articlesStore.newItem['story_name']}
               onChange={this.onChange}
             />
           </div>
@@ -85,9 +74,9 @@ export default class ArticleForm extends React.Component {
               type="submit"
               className="btn btn-success"
               disabled={
-                !this.props.article.name ||
-                !this.props.article.text ||
-                !this.props.article.story_name
+                !this.context.articlesStore.newItem['name'] ||
+                !this.context.articlesStore.newItem['text'] ||
+                !this.context.articlesStore.newItem['story_name']
               }
             >
               Create article
