@@ -18,7 +18,7 @@ class Api::V1::ArticlesController < Api::V1::Controller
       @articles = Article.all
     end
 
-    respond_with response_data(@articles, group_by, sort_by)
+    respond_with response_data(@articles.includes(:story), group_by, sort_by)
   end
 
   def create
