@@ -1,24 +1,48 @@
 class Api::V1::ArticlesController < Api::V1::Controller
   def index
-    search_by_name = params[:search_by_name].presence
-    search_by_text = params[:search_by_text].presence
+    search = params[:search].presence
     group_by = params[:group_by].presence
     sort_by = params[:sort_by].presence
 
-    if search_by_name && search_by_text
+    unless ["name", "text", "article_type", "story_id"].include?(group_by)
+      group_by = nil
+    end
+
+    if search
       @articles =
-        Article.where("name like ? and text like ?",
-                      "%#{search_by_name}%",
-                      "%#{search_by_text}%")
-    elsif search_by_name
-      @articles = Article.where("name like ?", "%#{search_by_name}%")
-    elsif search_by_text
-      @articles = Article.where("text like ?", "%#{search_by_text}%")
+        Article.where("LOWER(name) LIKE :search OR LOWER(text) LIKE :search",
+                      search: "%#{search.downcase}%")
     else
       @articles = Article.all
     end
 
-    respond_with response_data(@articles.includes(:story), group_by, sort_by)
+    join_sql =
+      if group_by
+        <<-SQL
+          JOIN (SELECT #{group_by}, COUNT(*) as articles_count,
+            COUNT(DISTINCT article_type) as article_types_count
+            FROM articles GROUP BY #{group_by}) s
+          ON articles.#{group_by} = s.#{group_by}
+        SQL
+      else
+        <<-SQL
+          CROSS JOIN (SELECT COUNT(*) as articles_count,
+            COUNT(DISTINCT article_type) AS article_types_count FROM articles) s
+        SQL
+      end
+
+    @articles = @articles.joins(join_sql)
+
+    if sort_by
+      @articles = @articles.order(sort_by)
+    end
+
+    @articles =
+      @articles.
+        select("articles.*, s.articles_count, s.article_types_count").
+        includes(:story)
+
+    respond_with response_data(@articles.includes(:story), group_by)
   end
 
   def create
@@ -50,7 +74,7 @@ class Api::V1::ArticlesController < Api::V1::Controller
       permit(:name, :text, :article_type)
   end
 
-  def response_data(articles, group_by, sort_by)
+  def response_data(articles, group_by)
     res =
       if group_by
         articles.group_by { |a| a.read_attribute(group_by) }
@@ -59,13 +83,6 @@ class Api::V1::ArticlesController < Api::V1::Controller
       end
 
     res.map do |k, v|
-      v = v.sort_by { |a| a.read_attribute(sort_by) } if sort_by
-
-      counts_by_type =
-        v.
-          group_by(&:article_type).
-          map { |k, v| {article_type: k, count: v.count} }
-
       list =
         v.map do |a|
           {id: a.id,
@@ -75,7 +92,10 @@ class Api::V1::ArticlesController < Api::V1::Controller
            story_name: a.story.name}
         end
 
-      {key: k, list: list, count: list.count, counts_by_type: counts_by_type}
+      {key: k,
+       list: list,
+       count: v.first&.articles_count,
+       types_count: v.first&.article_types_count}
     end
   end
 end

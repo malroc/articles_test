@@ -3,8 +3,7 @@ import { observable } from 'mobx'
 export default class ArticlesStore {
   @observable data = []
   @observable query = {
-    'search_by_name': '',
-    'search_by_text': '',
+    'search': '',
     'group_by': '',
     'sort_by': ''
   }

@@ -64,26 +64,9 @@ export default class ArticlesTable extends React.Component {
                 <input
                   className="form-control py-2 border-right-0 border"
                   type="text"
-                  name="search_by_name"
-                  placeholder="Search by name"
-                  value={this.context.articlesStore.query.search_by_name}
-                  onChange={this.onChange}
-                />
-                <span className="input-group-append">
-                  <div className="input-group-text bg-transparent">
-                    <i className="fa fa-search" />
-                  </div>
-                </span>
-              </div>
-            </td>
-            <td>
-              <div className="input-group">
-                <input
-                  className="form-control py-2 border-right-0 border"
-                  type="text"
-                  name="search_by_text"
-                  placeholder="Search by text"
-                  value={this.context.articlesStore.query.search_by_text}
+                  name="search"
+                  placeholder="Search article"
+                  value={this.context.articlesStore.query.search}
                   onChange={this.onChange}
                 />
                 <span className="input-group-append">
@@ -107,7 +90,7 @@ export default class ArticlesTable extends React.Component {
                 <option value="story_id">Sort by story</option>
               </select>
             </td>
-            <td>
+            <td colSpan="2">
               <select
                 className="form-control"
                 name="group_by"
@@ -146,16 +129,7 @@ export default class ArticlesTable extends React.Component {
             <tr className="table-info">
               <th scope="col">Group key: {group.key}</th>
               <td>Count: {group.count}</td>
-              <td colSpan="3">
-                {group.counts_by_type.map(item => (
-                  <span
-                    className="counts-by-type"
-                    key={`${group.key}_${item.article_type}`}
-                  >
-                    {item.article_type}: {item.count}
-                  </span>
-                ))}
-              </td>
+              <td colSpan="2">Types count: {group.types_count}</td>
             </tr>
           </tbody>
         ))}
